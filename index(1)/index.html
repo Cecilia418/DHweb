@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lost and Found in Translation</title>
+  <style>
+    :root {
+      --paper: #F5F0E8;
+      --ink: #2C2C2C;
+      --vermillion: #C45A3C;
+      --soft-gray: #D8D0C5;
+      --pale-gray: rgba(216, 208, 197, 0.24);
+      --card: rgba(255, 252, 247, 0.56);
+      --card-strong: rgba(255, 252, 247, 0.82);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 14% 8%, rgba(196, 90, 60, 0.07), transparent 30%),
+        radial-gradient(circle at 86% 20%, rgba(44, 44, 44, 0.045), transparent 28%),
+        radial-gradient(circle at 18% 92%, rgba(196, 90, 60, 0.04), transparent 24%),
+        var(--paper);
+      color: var(--ink);
+      font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.82;
+    }
+
+    .page {
+      width: min(100%, 1180px);
+      margin: 0 auto;
+      padding: clamp(48px, 7vw, 108px) clamp(22px, 5.5vw, 80px);
+    }
+
+    h1,
+    h2,
+    h3,
+    .poem-title,
+    .cn-line,
+    blockquote {
+      font-family: "Noto Serif SC", "Source Han Serif SC", "思源宋体", "Songti SC", "SimSun", serif;
+      font-weight: 400;
+    }
+
+    h2 {
+      margin: 0 0 28px;
+      font-size: clamp(25px, 3vw, 38px);
+      letter-spacing: 0.08em;
+    }
+
+    h3 {
+      margin: 0 0 12px;
+      color: var(--vermillion);
+      font-size: 20px;
+      letter-spacing: 0.06em;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    a {
+      color: var(--vermillion);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(196, 90, 60, 0.32);
+      transition: border-color 180ms ease, color 180ms ease;
+    }
+
+    a:hover {
+      color: #9f3f29;
+      border-color: currentColor;
+    }
+
+    .section {
+      position: relative;
+      padding: clamp(54px, 7vw, 96px) 0;
+      border-top: 1px solid rgba(216, 208, 197, 0.76);
+    }
+
+    .section-kicker {
+      margin-bottom: 14px;
+      color: var(--vermillion);
+      font-size: 12px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+    }
+
+    .poem-card {
+      position: relative;
+      padding: clamp(38px, 6vw, 72px) 0;
+      text-align: center;
+    }
+
+    .poem-card::before,
+    .poem-card::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      width: min(144px, 28vw);
+      height: 1px;
+      background: var(--soft-gray);
+      transform: translateX(-50%);
+    }
+
+    .poem-card::before {
+      top: 0;
+    }
+
+    .poem-card::after {
+      bottom: 0;
+    }
+
+    .poem-title {
+      margin-bottom: 42px;
+      color: var(--vermillion);
+      font-size: 18px;
+      letter-spacing: 0.3em;
+    }
+
+    .verse-grid {
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) 1px minmax(280px, 1fr);
+      gap: clamp(26px, 5vw, 58px);
+      align-items: stretch;
+    }
+
+    .divider {
+      width: 1px;
+      min-height: 100%;
+      background: linear-gradient(transparent, var(--soft-gray) 16%, var(--soft-gray) 84%, transparent);
+    }
+
+    .poem,
+    .translation {
+      display: grid;
+      gap: 18px;
+      align-content: center;
+    }
+
+    .line {
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      transition: border-color 220ms ease, background-color 220ms ease, transform 220ms ease;
+    }
+
+    .cn-line {
+      font-size: clamp(30px, 4.4vw, 48px);
+      letter-spacing: 0.16em;
+      cursor: default;
+    }
+
+    .en-line {
+      padding: 0 22px;
+      color: rgba(44, 44, 44, 0.76);
+      font-size: clamp(15px, 1.8vw, 18px);
+      line-height: 1.55;
+      letter-spacing: 0.02em;
+    }
+
+    .verse-grid:has(.cn-line:nth-child(1):hover) .en-line:nth-child(1),
+    .verse-grid:has(.cn-line:nth-child(2):hover) .en-line:nth-child(2),
+    .verse-grid:has(.cn-line:nth-child(3):hover) .en-line:nth-child(3),
+    .verse-grid:has(.cn-line:nth-child(4):hover) .en-line:nth-child(4) {
+      background: var(--pale-gray);
+      border-color: rgba(196, 90, 60, 0.34);
+      transform: translateY(-1px);
+    }
+
+    .intro-grid {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.88fr) minmax(300px, 1.12fr);
+      gap: clamp(34px, 6vw, 74px);
+      align-items: center;
+    }
+
+    figure {
+      margin: 0;
+    }
+
+    .image-frame {
+      position: relative;
+      min-height: 360px;
+      padding: 12px;
+      border: 1px solid rgba(196, 90, 60, 0.28);
+      background: rgba(255, 252, 247, 0.34);
+    }
+
+    .image-frame img {
+      width: 100%;
+      height: 100%;
+      min-height: 334px;
+      display: block;
+      object-fit: cover;
+      filter: saturate(0.86) contrast(0.96);
+    }
+
+    .caption {
+      margin-top: 14px;
+      color: rgba(44, 44, 44, 0.6);
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      text-align: center;
+    }
+
+    .lead-copy {
+      display: grid;
+      gap: 20px;
+      color: rgba(44, 44, 44, 0.78);
+      font-size: 16px;
+      text-align: left;
+    }
+
+    .note-box {
+      padding: 22px 24px;
+      border-left: 2px solid var(--vermillion);
+      background: rgba(255, 252, 247, 0.42);
+      color: rgba(44, 44, 44, 0.74);
+    }
+
+    blockquote {
+      margin: 0;
+      padding: 34px clamp(26px, 5vw, 54px);
+      border-left: 2px solid var(--vermillion);
+      background: var(--card);
+      color: rgba(44, 44, 44, 0.8);
+      font-size: clamp(20px, 2.6vw, 30px);
+      line-height: 1.7;
+    }
+
+    .cards {
+      display: grid;
+      gap: 18px;
+    }
+
+    .card {
+      border: 1px solid rgba(216, 208, 197, 0.82);
+      background: var(--card-strong);
+      transition: border-color 220ms ease, background-color 220ms ease, box-shadow 220ms ease;
+    }
+
+    .card:hover {
+      border-color: rgba(196, 90, 60, 0.36);
+      box-shadow: 0 22px 58px rgba(44, 44, 44, 0.055);
+    }
+
+    .card-title {
+      padding: 26px 30px;
+      font-size: clamp(19px, 2.1vw, 25px);
+      letter-spacing: 0.04em;
+      color: var(--ink);
+      font-family: "Noto Serif SC", "Source Han Serif SC", "思源宋体", serif;
+    }
+
+    .card-body {
+      padding: 0 30px 32px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(240px, 0.8fr);
+      gap: 28px;
+      text-align: left;
+    }
+
+    .english {
+      display: grid;
+      gap: 16px;
+      color: rgba(44, 44, 44, 0.82);
+      font-size: 16px;
+    }
+
+    .chinese-note {
+      align-self: start;
+      padding: 22px;
+      border: 1px solid rgba(196, 90, 60, 0.22);
+      background: rgba(245, 240, 232, 0.52);
+      color: rgba(44, 44, 44, 0.68);
+      font-size: 15px;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .pill {
+      padding: 6px 12px;
+      border: 1px solid rgba(196, 90, 60, 0.26);
+      border-radius: 999px;
+      color: rgba(44, 44, 44, 0.68);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    .closing {
+      max-width: 820px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .closing p {
+      color: rgba(44, 44, 44, 0.76);
+      font-size: clamp(17px, 1.9vw, 21px);
+    }
+
+    footer {
+      padding-top: 54px;
+      color: rgba(44, 44, 44, 0.42);
+      font-size: 12px;
+      letter-spacing: 0.22em;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .verse-grid,
+      .intro-grid,
+      .card-body {
+        grid-template-columns: 1fr;
+      }
+
+      .divider {
+        width: 100%;
+        height: 1px;
+        min-height: 1px;
+        background: linear-gradient(90deg, transparent, var(--soft-gray) 18%, var(--soft-gray) 82%, transparent);
+      }
+
+      .line {
+        min-height: 50px;
+      }
+
+      .image-frame,
+      .image-frame img {
+        min-height: 280px;
+      }
+
+      .card-title {
+        padding: 22px 22px;
+      }
+
+      .card-body {
+        padding: 0 22px 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <!-- 页面开头直接展示诗歌区域 -->
+    <section class="section poem-card" aria-labelledby="poem-title">
+      <div id="poem-title" class="poem-title">静夜思 · 李白 / Translated by Xu Yuanchong</div>
+      <div class="verse-grid">
+        <div class="poem" aria-label="中文诗句">
+          <div class="line cn-line">床前明月光</div>
+          <div class="line cn-line">疑是地上霜</div>
+          <div class="line cn-line">举头望明月</div>
+          <div class="line cn-line">低头思故乡</div>
+        </div>
+        <div class="divider" aria-hidden="true"></div>
+        <div class="translation" aria-label="英文译文">
+          <div class="line en-line">Before my bed, a pool of light—</div>
+          <div class="line en-line">O can it be hoar-frost on the ground?</div>
+          <div class="line en-line">Look up, I find the Moon Bright,</div>
+          <div class="line en-line">Bowing, in homesickness I’m drowned.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 许渊冲介绍区域 -->
+    <section class="section intro-grid" aria-labelledby="profile-title">
+      <figure>
+        <div class="image-frame">
+          <img src="许渊冲.png" alt="Xu Yuanchong portrait from the source document" />
+        </div>
+        <figcaption class="caption">Xu Yuanchong (1921–2021), a major Chinese literary translator known for rendering classical Chinese poetry into English and French.</figcaption>
+      </figure>
+      <div class="lead-copy">
+        <p class="section-kicker">Profile Link</p>
+        <h2 id="profile-title">Xu Yuanchong / 许渊冲</h2>
+        <p>Xu Yuanchong devoted more than sixty years to translating Chinese poetry into English and French. His work asks a central question: how can a poem remain beautiful when it moves from one language, rhythm, and culture into another?</p>
+        <p class="note-box">许渊冲强调翻译不是机械转换，而是以新的语言重新创造诗歌之美。</p>
+        <p><a href="https://baike.so.com/doc/5923674-32385362.html" target="_blank" rel="noopener noreferrer">Open Xu Yuanchong’s Baidu Baike profile / 查看许渊冲百度百科</a></p>
+      </div>
+    </section>
+
+    <!-- 讲义卡片区域（全部直接展示，无折叠） -->
+    <section class="section" aria-labelledby="cards-title">
+      <div class="cards">
+        <!-- 第一块 -->
+        <div class="card">
+          <div class="card-title">The Challenge: Chinese and English, Worlds Apart / 挑战：中英文，天壤之别</div>
+          <div class="card-body">
+            <div class="english">
+              <p>Classical Chinese poetry is concise. Each character carries weight, and the grammar is minimal. The reader is invited to feel rather than to be told.</p>
+              <p>English, on the other hand, demands clarity. It requires subjects, verbs, articles. And here is the deeper challenge: in Chinese culture, the moon is intimately connected with homesickness. But an English reader does not share that cultural association. if you translate literally—“look up and see the moon, lower your head and think of home”—foreign readers might understand the words, but they would not feel the emotion.</p>
+            </div>
+            <aside class="chinese-note">
+              中国古典诗歌讲求凝练。每个字都承重，语法极度精简。读者需要去感受，而不是被“告诉”。
+              <br>英文则恰恰相反，它要求清晰，主语、谓语、冠词，一样不能少。更深层的挑战在于，在中国文化中，月亮与思乡紧密相连。然而，英语世界的读者，并没有这种文化共感。如果逐字译成“抬头看月亮，低头想家乡”，外国读者或许能理解字面意思，却无法感受到那份情感。
+            </aside>
+          </div>
+        </div>
+
+        <!-- 第二块 -->
+        <div class="card">
+          <div class="card-title">Xu Yuanchong’s Method / 许渊冲与再创造</div>
+          <div class="card-body">
+            <div class="english">
+              The Chinese aesthetic values containment—the idea that the deepest emotions are expressed in the simplest language. Xu’s translation may have sacrificed some of that subtlety.
+              <p>Yet Xu would have responded: that is the price of cross-cultural communication. If a translation is perfectly faithful but no one wants to read it, what is the point?  He once said that his goal was to “turn the beauty created by one nation into the beauty of the world”. And that sometimes requires taking risks.</p>
+            </div>
+            <aside class="chinese-note">
+              中国美学珍视“含而不露”，最深沉的情感，恰恰用最朴素、最节制的语言来表达。而许渊冲的译文可能牺牲了部分这种细腻。
+              <br>但许渊冲一定会回应：这是跨文化交流必须付出的代价。如果译文完美忠实，却没人愿意读，那又有何意义？他曾说，自己的目标是“把一国创造的美，转化为世界的美”。而这，有时必须冒险。
+            </aside>
+          </div>
+        </div>
+
+        <!-- 第三块 -->
+        <div class="card">
+          <div class="card-title">Cultural Transmission / 文化传播：搭建桥梁</div>
+          <div class="card-body">
+            <div class="english">
+              China’s classical poetry is a treasure of world literature. But for too long, it remained locked behind the barrier of language. Xu dedicated his life to unlocking that door. Through his translations, millions of readers around the world have encountered Li Bai, Du Fu, and countless other Chinese poets.
+              <p>Was something lost in translation? Yes.  But something is also gained. Li Bai’s poem, in Xu’s hands, became a new poem—an English poem that carries the spirit of the Chinese original while speaking directly to the heart of an English reader. The “pool of light” and the drowning in homesickness capture something essential: the feeling of being alone in a strange place, looking at the same moon that shines on everyone you love, and missing them with an ache that words can barely contain.</p>
+            </div>
+            <aside class="chinese-note">
+              中国古典诗歌是世界文学的瑰宝。但长久以来，它被语言的壁垒封锁。许渊冲先生倾其一生，去推开这扇门。通过他的译笔，全世界数百万读者得以认识李白、杜甫，以及无数中国诗人。
+              <br>翻译中，有没有流失？有。但同时，也有东西被“获得”。李白的诗，在许渊冲笔下，成为了一首新的诗——一首带着中文原诗的精神，同时又能直抵英语读者内心的英文诗。“一池月光”和“沉溺”的乡愁，捕捉到了最本质的东西：一个人孤身在外，仰望同一轮明月，想到它同样照耀着远方的亲人，那种无以名状的、无法言说的思念。
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 名言区块 -->
+    <section class="section" aria-label="quotation">
+      <blockquote>
+        “the moonlight is the same, no matter where you stand. And homesickness—well, that needs no translation at all.”<br />
+        “月光在哪里都一样，而乡愁，它根本不需要翻译。”
+      </blockquote>
+    </section>
+
+  </main>
+</body>
+</html>
